@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#102c26" />
+  <title>Bench Players</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="roster.css" />
+  <link rel="stylesheet" href="goals.css" />
+  <link rel="stylesheet" href="theme.css" />
+  <link rel="stylesheet" href="formation.css" />
+  <link rel="stylesheet" href="polish.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand"><span class="ball">⚽</span><div><p>UNDER 13 • 9-A-SIDE</p><h1>Bench Players</h1></div></div>
+      <button class="icon-button" id="settingsButton" aria-label="Open match settings">⚙</button>
+    </header>
+
+    <section class="scoreboard" aria-label="Match timer">
+      <div><span class="eyebrow">CURRENT HALF</span><strong id="halfLabel">First half</strong></div>
+      <div class="timer" id="timer">00:00</div>
+      <div><span class="eyebrow">NEXT WINDOW</span><strong id="nextWindow">10:00</strong></div>
+      <div class="timer-actions"><button id="startPause">Start match</button><button class="secondary" id="halfButton">Half-time</button></div>
+    </section>
+    <section class="score-card" aria-label="Score">
+      <div><span class="eyebrow" id="ourTeamLabel">YOUR TEAM</span><strong id="ourScore">0</strong></div>
+      <div class="score-middle"><span class="eyebrow">SCORE</span><b id="scoreLine">0 — 0</b><button id="goalButton">+ Record goal</button></div>
+      <div><span class="eyebrow" id="opponentTeamLabel">OPPOSITION</span><strong id="opponentScore">0</strong></div>
+    </section>
+    <section class="goal-log" id="goalLog" hidden>
+      <div><span class="eyebrow">LATEST GOAL</span><strong id="latestGoal"></strong></div>
+      <button class="secondary" id="undoGoalButton">Undo goal</button>
+    </section>
+
+    <section class="recommendation" id="recommendation">
+      <div class="recommendation-mark">↻</div>
+      <div><span class="eyebrow" id="suggestionStatus">NEXT ROTATION</span><h2 id="suggestionTitle">Start the match to get a suggestion</h2><p id="suggestionReason">We will balance minutes while keeping your positions covered.</p></div>
+      <button class="accept" id="acceptSuggestion" disabled>Make change</button>
+    </section>
+
+    <div class="alert-strip" id="alertStrip" hidden></div>
+
+    <nav class="tabs" aria-label="Main navigation">
+      <button class="active" data-tab="pitch">On pitch <span id="pitchCount">9</span></button>
+      <button data-tab="formation">Formation</button>
+      <button data-tab="bench">Bench <span id="benchCount">3</span></button>
+      <button data-tab="minutes">Minutes</button>
+      <button data-tab="history">History</button>
+    </nav>
+
+    <section id="pitchPanel" class="tab-panel active">
+      <div class="section-heading"><div><h2>Players on the pitch</h2><p>Tap a player to choose who comes off.</p></div><button class="text-button" id="manualButton">Manual sub</button></div>
+      <div class="player-grid" id="pitchList"></div>
+    </section>
+    <section id="formationPanel" class="tab-panel">
+      <div class="section-heading"><div><h2 id="formationTitle">Formation</h2><p>Current players, organised by position.</p></div><button class="text-button" id="formationSubButton">Make a sub</button></div>
+      <div class="formation-pitch" id="formationView"></div>
+    </section>
+    <section id="benchPanel" class="tab-panel">
+      <div class="section-heading"><div><h2>Bench players</h2><p>Tap a player to choose who comes on.</p></div></div>
+      <div class="player-grid" id="benchList"></div>
+    </section>
+    <section id="minutesPanel" class="tab-panel">
+      <div class="section-heading"><div><h2>Playing-time balance</h2><p id="targetText"></p></div></div>
+      <div class="minutes-list" id="minutesList"></div>
+    </section>
+    <section id="historyPanel" class="tab-panel">
+      <div class="section-heading"><div><h2>Past games</h2><p>Completed matches saved on this device.</p></div></div>
+      <div class="minutes-list" id="matchHistory"></div>
+    </section>
+
+    <section class="quick-actions">
+      <button id="undoButton">↶ Undo last sub</button>
+      <button id="newMatchButton">＋ New match</button>
+      <button id="endButton" class="danger">End match</button>
+    </section>
+  </main>
+
+  <dialog id="subDialog">
+    <form method="dialog" class="modal">
+      <button class="close" value="cancel" aria-label="Close">×</button>
+      <span class="eyebrow">MAKE A SUBSTITUTION</span><h2>Choose the change</h2>
+      <label>Player coming off<select id="offSelect"></select></label>
+      <label>Player coming on<select id="onSelect"></select></label>
+      <p class="coverage-note" id="coverageNote"></p>
+      <button class="confirm" id="confirmSub" value="default">Confirm substitution</button>
+    </form>
+  </dialog>
+
+  <dialog id="settingsDialog">
+    <form method="dialog" class="modal settings">
+      <button class="close" value="cancel" aria-label="Close">×</button>
+      <span class="eyebrow">MANAGER SETUP</span><h2>Match settings</h2>
+      <div class="form-grid">
+        <label>Your team name<input id="teamName" value="Your Team" /></label>
+        <label>Opposition name<input id="opponentName" value="Opposition" /></label>
+        <label>Match length (minutes)<input id="matchLength" type="number" min="10" value="60" /></label>
+        <label>Halves<select id="halves"><option value="2">2 halves</option><option value="1">One match</option></select></label>
+        <label>Players on pitch<input id="playersOnPitch" type="number" min="5" max="11" value="9" /></label>
+        <label>Rotation every<select id="rotationInterval"><option value="5">5 minutes</option><option value="10" selected>10 minutes</option><option value="15">15 minutes</option></select></label>
+        <label>Formation<select id="formation"><option value="3-3-2">3-3-2</option><option value="3-2-3">3-2-3</option><option value="4-3-1">4-3-1</option><option value="4-2-2">4-2-2</option><option value="2-4-2">2-4-2</option></select></label>
+        <label class="switch">Position coverage warnings<input id="coverageRequired" type="checkbox" checked /><span></span></label>
+        <label class="switch">Rotation sound<input id="soundEnabled" type="checkbox" checked /><span></span></label>
+        <label class="switch">Vibrate on rotation<input id="vibrationEnabled" type="checkbox" checked /><span></span></label>
+      </div>
+      <div class="squad-editor"><h3>Your squad</h3><p>Change names and positions here. Tick the players starting on the pitch.</p><div id="rosterFields"></div><button class="secondary add-player" type="button" id="addPlayer">+ Add player</button></div>
+      <button class="confirm" id="saveSettings" value="default">Save match settings</button>
+      <button class="secondary full" id="resetDemo" value="default">Reset demo team</button>
+    </form>
+  </dialog>
+
+  <dialog id="summaryDialog">
+    <form method="dialog" class="modal summary">
+      <span class="eyebrow">MATCH COMPLETE</span><h2>Playing-time summary</h2>
+      <p id="summaryIntro"></p><div id="summaryList" class="minutes-list"></div>
+      <button class="confirm" value="default">Close summary</button>
+    </form>
+  </dialog>
+  <dialog id="goalDialog">
+    <form method="dialog" class="modal">
+      <button class="close" value="cancel" aria-label="Close">×</button>
+      <span class="eyebrow">GOAL RECORDED AT <span id="goalTime">00:00</span></span><h2>Who scored?</h2>
+      <label>Goal for<select id="goalTeam"><option value="ours">Your team</option><option value="opponent">Opposition</option></select></label>
+      <label id="scorerLabel">Goalscorer<select id="scorerSelect"></select></label>
+      <label id="oppositionScorerLabel" hidden>Opposition goalscorer (optional)<input id="oppositionScorer" placeholder="e.g. Jordan" /></label>
+      <button class="confirm" id="confirmGoal" value="default">Record goal</button>
+    </form>
+  </dialog>
+  <script src="app.js"></script>
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');</script>
+</body>
+</html>
