@@ -14,11 +14,12 @@
   <link rel="stylesheet" href="theme.css" />
   <link rel="stylesheet" href="formation.css" />
   <link rel="stylesheet" href="polish.css" />
+  <link rel="stylesheet" href="coach-tools.css" />
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar">
-      <div class="brand"><span class="ball">⚽</span><div><p>UNDER 13 • 9-A-SIDE</p><h1>Bench Players</h1></div></div>
+      <div class="brand"><span class="ball" id="teamBadge">BP</span><div><p>UNDER 13 • 9-A-SIDE</p><h1>Bench Players</h1></div></div>
       <button class="icon-button" id="settingsButton" aria-label="Open match settings">⚙</button>
     </header>
 
@@ -42,6 +43,7 @@
       <div class="recommendation-mark">↻</div>
       <div><span class="eyebrow" id="suggestionStatus">NEXT ROTATION</span><h2 id="suggestionTitle">Start the match to get a suggestion</h2><p id="suggestionReason">We will balance minutes while keeping your positions covered.</p></div>
       <button class="accept" id="acceptSuggestion" disabled>Make change</button>
+      <div class="next-three" id="nextThree"></div>
     </section>
 
     <div class="alert-strip" id="alertStrip" hidden></div>
@@ -52,6 +54,7 @@
       <button data-tab="bench">Bench <span id="benchCount">3</span></button>
       <button data-tab="minutes">Minutes</button>
       <button data-tab="history">History</button>
+      <button data-tab="timeline">Timeline</button>
     </nav>
 
     <section id="pitchPanel" class="tab-panel active">
@@ -74,10 +77,15 @@
       <div class="section-heading"><div><h2>Past games</h2><p>Completed matches saved on this device.</p></div></div>
       <div class="minutes-list" id="matchHistory"></div>
     </section>
+    <section id="timelinePanel" class="tab-panel">
+      <div class="section-heading"><div><h2>Match timeline</h2><p>Goals, substitutions, and key moments.</p></div></div>
+      <div class="minutes-list" id="timelineList"></div>
+    </section>
 
     <section class="quick-actions">
       <button id="undoButton">↶ Undo last sub</button>
       <button id="newMatchButton">＋ New match</button>
+      <button id="lockButton">🔒 Lock match</button>
       <button id="endButton" class="danger">End match</button>
     </section>
   </main>
@@ -100,6 +108,7 @@
       <div class="form-grid">
         <label>Your team name<input id="teamName" value="Your Team" /></label>
         <label>Opposition name<input id="opponentName" value="Opposition" /></label>
+        <label>Team kit colour<input id="kitColor" type="color" value="#cf182b" /></label>
         <label>Match length (minutes)<input id="matchLength" type="number" min="10" value="60" /></label>
         <label>Halves<select id="halves"><option value="2">2 halves</option><option value="1">One match</option></select></label>
         <label>Players on pitch<input id="playersOnPitch" type="number" min="5" max="11" value="9" /></label>
@@ -111,7 +120,8 @@
       </div>
       <div class="squad-editor"><h3>Your squad</h3><p>Change names and positions here. Tick the players starting on the pitch.</p><div id="rosterFields"></div><button class="secondary add-player" type="button" id="addPlayer">+ Add player</button></div>
       <button class="confirm" id="saveSettings" value="default">Save match settings</button>
-      <button class="secondary full" id="resetDemo" value="default">Reset demo team</button>
+      <button class="secondary full" type="button" id="exportBackup">Download backup</button>
+      <label class="secondary full import-label">Restore backup<input id="importBackup" type="file" accept="application/json" hidden /></label>
     </form>
   </dialog>
 
@@ -119,6 +129,7 @@
     <form method="dialog" class="modal summary">
       <span class="eyebrow">MATCH COMPLETE</span><h2>Playing-time summary</h2>
       <p id="summaryIntro"></p><div id="summaryList" class="minutes-list"></div>
+      <button class="secondary full" type="button" id="shareReport">Share match report</button>
       <button class="confirm" value="default">Close summary</button>
     </form>
   </dialog>
